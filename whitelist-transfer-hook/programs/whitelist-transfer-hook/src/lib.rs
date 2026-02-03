@@ -20,15 +20,15 @@ declare_id!("TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY");
 pub mod whitelist_transfer_hook {
     use super::*;
 
-    pub fn initialize_whitelist(ctx: Context<InitializeWhitelist>) -> Result<()> {
-        ctx.accounts.initialize_whitelist(ctx.bumps)
+    // pub fn initialize_whitelist(ctx: Context<InitializeWhitelist>) -> Result<()> {
+    //     ctx.accounts.initialize_whitelist(ctx.bumps)
+    // }
+
+    pub fn add_to_whitelist(ctx: Context<AddToWhitelist>, user: Pubkey) -> Result<()> {
+        ctx.accounts.add_to_whitelist(user, &ctx.bumps)
     }
 
-    pub fn add_to_whitelist(ctx: Context<WhitelistOperations>, user: Pubkey) -> Result<()> {
-        ctx.accounts.add_to_whitelist(user)
-    }
-
-    pub fn remove_from_whitelist(ctx: Context<WhitelistOperations>, user: Pubkey) -> Result<()> {
+    pub fn remove_from_whitelist(ctx: Context<RemoveFromWhitelist>, user: Pubkey) -> Result<()> {
         ctx.accounts.remove_from_whitelist(user)
     }
 
