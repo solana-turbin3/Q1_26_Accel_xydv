@@ -1,0 +1,52 @@
+[2026-02-02--22-03-10 INFO actix_server::builder] starting 5 workers
+[2026-02-02--22-03-10 INFO actix_server::server] Tokio runtime found; starting in existing Tokio runtime
+[2026-02-02--22-03-10 INFO actix_server::server] starting service: "actix-web-service-127.0.0.1:18488", workers: 5, listening on: 127.0.0.1:18488
+[2026-02-02--22-03-11 INFO parity_ws] Listening for new connections on 127.0.0.1:8900.
+[2026-02-02--22-03-47 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:51378.
+[2026-02-02--22-04-09 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:33796.
+[2026-02-02--22-04-11 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-04-11 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-04-11 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-04-11 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-04-11 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-04-11 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-04-11 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:33812.
+[2026-02-02--22-04-24 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:39200.
+[2026-02-02--22-04-25 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-04-25 ERROR litesvm] Program account DhzyDgCmmQzVC4vEcj2zRGUyN8Mt5JynfdGLKkBcRGaX is not executable.
+[2026-02-02--22-05-13 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:46036.
+[2026-02-02--22-05-15 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-05-15 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-05-15 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-05-15 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-05-15 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-05-15 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-05-15 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:46044.
+[2026-02-02--22-05-28 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:33826.
+[2026-02-02--22-05-28 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-05-28 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-34 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:53034.
+[2026-02-02--22-07-35 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-35 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-36 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-36 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-36 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-36 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-36 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:53042.
+[2026-02-02--22-07-48 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:44088.
+[2026-02-02--22-07-48 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-07-48 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-09-15 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:35838.
+[2026-02-02--22-09-17 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-09-17 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-09-17 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-09-17 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-09-17 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-09-17 ERROR litesvm] Program account TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY is not executable.
+[2026-02-02--22-09-18 INFO parity_ws::io] Accepted a new tcp connection from 127.0.0.1:35842.
+[2026-02-02--22-09-19 INFO actix_server::accept] accept thread stopped
+[2026-02-02--22-09-19 INFO actix_server::worker] shutting down idle worker
+[2026-02-02--22-09-19 INFO actix_server::worker] shutting down idle worker
+[2026-02-02--22-09-19 INFO actix_server::worker] shutting down idle worker
+[2026-02-02--22-09-19 INFO actix_server::worker] shutting down idle worker
+[2026-02-02--22-09-19 INFO actix_server::worker] shutting down idle worker
