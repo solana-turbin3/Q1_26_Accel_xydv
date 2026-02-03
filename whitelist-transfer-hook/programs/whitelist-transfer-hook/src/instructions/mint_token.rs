@@ -12,6 +12,9 @@ pub struct TokenFactory<'info> {
         payer = user,
         mint::decimals = 9,
         mint::authority = user,
+        // researched from https://github.com/solana-developers/program-examples/blob/03c9b75d82e4514cc5031621e5b1cfdd036eaf42/tokens/token-2022/transfer-hook/allow-block-list-token/anchor/programs/abl-token/src/instructions/init_mint.rs#L31
+        extensions::transfer_hook::authority = user,
+        extensions::transfer_hook::program_id = crate::ID,
     )]
     pub mint: InterfaceAccount<'info, Mint>,
     /// CHECK: ExtraAccountMetaList Account, will be checked by the transfer hook
@@ -27,7 +30,7 @@ pub struct TokenFactory<'info> {
 }
 
 impl<'info> TokenFactory<'info> {
-    pub fn init_mint(&mut self, bumps: &TokenFactoryBumps) -> Result<()> {
+    pub fn init_mint(&mut self) -> Result<()> {
         Ok(())
     }
 }
