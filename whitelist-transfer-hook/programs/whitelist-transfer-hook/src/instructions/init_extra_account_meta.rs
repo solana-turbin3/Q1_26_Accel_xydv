@@ -4,8 +4,6 @@ use spl_tlv_account_resolution::{
     account::ExtraAccountMeta, seeds::Seed, state::ExtraAccountMetaList,
 };
 
-use crate::ID;
-
 #[derive(Accounts)]
 pub struct InitializeExtraAccountMetaList<'info> {
     #[account(mut)]
@@ -36,7 +34,9 @@ impl<'info> InitializeExtraAccountMetaList<'info> {
                 Seed::Literal {
                     bytes: b"whitelist".to_vec(),
                 },
-                Seed::AccountKey { index: 1 },
+                // owner is @ index 3
+                // https://github.com/solana-developers/anchor-transfer-hook/blob/098b6a1142eb57bd337d17e46320abcc3c1f6233/programs/transfer-hook/src/lib.rs#L64
+                Seed::AccountKey { index: 3 },
             ],
             false,
             false,

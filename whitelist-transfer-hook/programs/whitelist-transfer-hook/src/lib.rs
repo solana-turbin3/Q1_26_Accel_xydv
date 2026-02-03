@@ -10,9 +10,7 @@ use instructions::*;
 
 use spl_discriminator::SplDiscriminate;
 use spl_tlv_account_resolution::state::ExtraAccountMetaList;
-use spl_transfer_hook_interface::instruction::{
-    ExecuteInstruction, InitializeExtraAccountMetaListInstruction,
-};
+use spl_transfer_hook_interface::instruction::ExecuteInstruction;
 
 declare_id!("TotiJ9PnY4KFvpexKNWeKD5Ndyb4otXKsqyvzhhyjcY");
 
