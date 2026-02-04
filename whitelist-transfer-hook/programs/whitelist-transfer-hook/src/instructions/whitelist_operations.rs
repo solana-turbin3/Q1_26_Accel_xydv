@@ -97,9 +97,12 @@ pub struct AddToWhitelist<'info> {
 }
 
 impl<'info> AddToWhitelist<'info> {
-    pub fn add_to_whitelist(&mut self, address: Pubkey, bumps: &AddToWhitelistBumps) -> Result<()> {
+    pub fn add_to_whitelist(
+        &mut self,
+        _address: Pubkey,
+        bumps: &AddToWhitelistBumps,
+    ) -> Result<()> {
         self.whitelist.set_inner(Whitelist {
-            address,
             bump: bumps.whitelist,
         });
 
