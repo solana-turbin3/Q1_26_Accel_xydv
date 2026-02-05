@@ -361,4 +361,152 @@ mod tests {
             "vault account must be closed"
         );
     }
+
+    #[test]
+    fn test_refund() {
+        let (mut program, payer) = setup();
+
+        let taker = Keypair::new();
+
+        program
+            .airdrop(&taker.pubkey(), 10 * LAMPORTS_PER_SOL)
+            .unwrap();
+
+        // 1) create a escrow using make ix
+
+        let maker = payer.pubkey();
+
+        let mint_a = CreateMint::new(&mut program, &payer)
+            .decimals(6)
+            .authority(&maker)
+            .send()
+            .unwrap();
+        msg!("Mint A: {}\n", mint_a);
+
+        let mint_b = CreateMint::new(&mut program, &payer)
+            .decimals(6)
+            .authority(&maker)
+            .send()
+            .unwrap();
+        msg!("Mint B: {}\n", mint_b);
+
+        let maker_ata_a = CreateAssociatedTokenAccount::new(&mut program, &payer, &mint_a)
+            .owner(&maker)
+            .send()
+            .unwrap();
+        msg!("Maker ATA A: {}\n", maker_ata_a);
+
+        let (escrow, _bump) = Pubkey::find_program_address(
+            &[b"escrow", maker.as_ref(), &123u64.to_le_bytes()],
+            &PROGRAM_ID,
+        );
+        msg!("Escrow PDA: {}\n", escrow);
+
+        let vault = associated_token::get_associated_token_address(&escrow, &mint_a);
+        msg!("Vault PDA: {}\n", vault);
+
+        let associated_token_program = spl_associated_token_account::ID;
+        let token_program = TOKEN_PROGRAM_ID;
+        let system_program = SYSTEM_PROGRAM_ID;
+
+        MintTo::new(&mut program, &payer, &mint_a, &maker_ata_a, 1000000000)
+            .send()
+            .unwrap();
+
+        let deposit = 10;
+        let receive = 50;
+
+        let make_ix = Instruction {
+            program_id: PROGRAM_ID,
+            accounts: crate::accounts::Make {
+                maker: maker,
+                mint_a: mint_a,
+                mint_b: mint_b,
+                maker_ata_a: maker_ata_a,
+                escrow: escrow,
+                vault: vault,
+                associated_token_program: associated_token_program,
+                token_program: token_program,
+                system_program: system_program,
+            }
+            .to_account_metas(None),
+            data: crate::instruction::Make {
+                deposit,
+                seed: 123u64,
+                receive,
+            }
+            .data(),
+        };
+
+        let message = Message::new(&[make_ix], Some(&payer.pubkey()));
+        let recent_blockhash = program.latest_blockhash();
+        let transaction = Transaction::new(&[&payer], message, recent_blockhash);
+
+        let tx = program.send_transaction(transaction).unwrap();
+
+        msg!("Make Tx Signature: {}", tx.signature);
+
+        let vault_account = program.get_account(&vault).unwrap();
+        let vault_data = spl_token::state::Account::unpack(&vault_account.data).unwrap();
+        assert_eq!(vault_data.amount, deposit);
+        assert_eq!(vault_data.owner, escrow);
+        assert_eq!(vault_data.mint, mint_a);
+
+        let escrow_account = program.get_account(&escrow).unwrap();
+        let escrow_data =
+            crate::state::Escrow::try_deserialize(&mut escrow_account.data.as_ref()).unwrap();
+        assert_eq!(escrow_data.seed, 123u64);
+        assert_eq!(escrow_data.maker, maker);
+        assert_eq!(escrow_data.mint_a, mint_a);
+        assert_eq!(escrow_data.mint_b, mint_b);
+        assert_eq!(escrow_data.receive, receive);
+
+        // send refund ix
+
+        let refund_ix = Instruction {
+            program_id: PROGRAM_ID,
+            accounts: crate::accounts::Refund {
+                maker: maker,
+                mint_a: mint_a,
+                maker_ata_a: maker_ata_a,
+                escrow: escrow,
+                vault: vault,
+                token_program: token_program,
+                system_program: system_program,
+            }
+            .to_account_metas(None),
+            data: crate::instruction::Refund {}.data(),
+        };
+
+        let message = Message::new(&[refund_ix], Some(&payer.pubkey()));
+        let recent_blockhash = program.latest_blockhash();
+        let transaction = Transaction::new(&[&payer], message, recent_blockhash);
+
+        let tx = program.send_transaction(transaction).unwrap();
+        msg!("Refund Tx Signature: {}", tx.signature);
+
+        let vault_account = program.get_account(&vault).unwrap();
+
+        let maker_ata_a_account = program.get_account(&maker_ata_a).unwrap();
+        let maker_ata_a_data =
+            spl_token::state::Account::unpack(&maker_ata_a_account.data).unwrap();
+
+        let escrow_account = program.get_account(&escrow).unwrap();
+
+        // check, vault closed, maker_ata_a has 1000000000 tokens, escrow is closed
+        assert!(
+            vault_account.data.is_empty(),
+            "vault account must be closed"
+        );
+
+        assert_eq!(
+            maker_ata_a_data.amount, 1000000000,
+            "maker must recieve deposit amount back"
+        );
+
+        assert!(
+            escrow_account.data.is_empty(),
+            "escrow account must be closed"
+        );
+    }
 }
