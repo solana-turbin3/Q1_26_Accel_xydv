@@ -63,6 +63,15 @@ pub struct Take<'info> {
 //Transfer tokens from vault to taker
 //Close vault account
 impl<'info> Take<'info> {
+    pub fn check_timestamp(&self) -> Result<()> {
+        let current_timestamp = Clock::get()?.unix_timestamp;
+        let five_days = 5 * 24 * 60 * 60;
+
+        require_gte!(current_timestamp, self.escrow.created_at + five_days);
+
+        Ok(())
+    }
+
     pub fn deposit(&mut self) -> Result<()> {
         let cpi_program = self.token_program.to_account_info();
 

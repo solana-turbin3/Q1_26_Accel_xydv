@@ -357,7 +357,7 @@ mod tests {
         let vault_account = program.get_account(&vault).unwrap();
 
         assert!(
-            vault_account.data.is_empty(),
+            vault_account.data.is_empty() && escrow_account.lamports.eq(&0),
             "vault account must be closed"
         );
     }
@@ -495,7 +495,7 @@ mod tests {
 
         // check, vault closed, maker_ata_a has 1000000000 tokens, escrow is closed
         assert!(
-            vault_account.data.is_empty(),
+            vault_account.data.is_empty() && vault_account.lamports.eq(&0),
             "vault account must be closed"
         );
 
@@ -505,7 +505,7 @@ mod tests {
         );
 
         assert!(
-            escrow_account.data.is_empty(),
+            escrow_account.data.is_empty() && escrow_account.lamports.eq(&0),
             "escrow account must be closed"
         );
     }
