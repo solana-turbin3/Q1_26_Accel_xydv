@@ -64,4 +64,10 @@ pub mod er_state_account {
 
         Ok(())
     }
+
+    pub fn schedule_update_user(ctx: Context<Schedule>, task_id: u16) -> Result<()> {
+        ctx.accounts.schedule(task_id, &ctx.bumps)?;
+
+        Ok(())
+    }
 }
