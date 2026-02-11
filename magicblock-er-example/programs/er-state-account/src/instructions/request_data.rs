@@ -12,13 +12,13 @@ pub struct RequestData<'info> {
     pub payer: Signer<'info>,
 
     #[account(
-        seeds = [b"user", user.key().as_ref()],
+        seeds = [b"user", payer.key().as_ref()],
         bump
     )]
     pub user: Account<'info, UserAccount>,
 
     /// CHECK: The oracle queue
-    #[account(mut, address = ephemeral_vrf_sdk::consts::DEFAULT_QUEUE)]
+    #[account(mut)]
     pub oracle_queue: AccountInfo<'info>,
 }
 
@@ -29,7 +29,7 @@ impl<'info> RequestData<'info> {
             payer: self.payer.key(),
             oracle_queue: self.oracle_queue.key(),
             callback_program_id: crate::ID,
-            // callback_discriminator: instruction::CallbackRollDice::DISCRIMINATOR.to_vec(),
+            callback_discriminator: crate::instruction::CallbackData::DISCRIMINATOR.to_vec(),
             caller_seed: [client_seed; 32],
             // Specify any account that is required by the *callback*
             accounts_metas: Some(vec![SerializableAccountMeta {

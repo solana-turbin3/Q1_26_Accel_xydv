@@ -1,6 +1,10 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import {
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SendTransactionError,
+} from "@solana/web3.js";
 import { GetCommitmentSignature } from "@magicblock-labs/ephemeral-rollups-sdk";
 import { ErStateAccount } from "../target/types/er_state_account";
 
@@ -16,29 +20,38 @@ describe("er-state-account", () => {
       {
         wsEndpoint:
           process.env.EPHEMERAL_WS_ENDPOINT || "wss://devnet.magicblock.app/",
-      },
+      }
     ),
-    anchor.Wallet.local(),
+    anchor.Wallet.local()
   );
   console.log("Base Layer Connection: ", provider.connection.rpcEndpoint);
   console.log(
     "Ephemeral Rollup Connection: ",
-    providerEphemeralRollup.connection.rpcEndpoint,
+    providerEphemeralRollup.connection.rpcEndpoint
   );
   console.log(`Current SOL Public Key: ${anchor.Wallet.local().publicKey}`);
 
+  const Queue = new PublicKey("Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh");
+  const ERQueue = new PublicKey("5hBR571xnXppuCPveTrctfTU7tJLSN94nq7kv7FRK5Tc");
+
   before(async function () {
     const balance = await provider.connection.getBalance(
-      anchor.Wallet.local().publicKey,
+      anchor.Wallet.local().publicKey
     );
     console.log("Current balance is", balance / LAMPORTS_PER_SOL, " SOL", "\n");
   });
 
   const program = anchor.workspace.erStateAccount as Program<ErStateAccount>;
 
+  // program with ephemeral provider
+  const ephemeralProgram = new anchor.Program(
+    program.idl,
+    providerEphemeralRollup
+  ) as typeof program;
+
   const userAccount = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("user"), anchor.Wallet.local().publicKey.toBuffer()],
-    program.programId,
+    program.programId
   )[0];
 
   it("Is initialized!", async () => {
@@ -63,6 +76,22 @@ describe("er-state-account", () => {
       })
       .rpc();
     console.log("\nUser Account State Updated: ", tx);
+  });
+
+  it("Update state using randomness (undelegated)", async () => {
+    const seed = Math.floor(Math.random() * 255);
+
+    const tx = await program.methods
+      .requestData(seed)
+      .accounts({ payer: anchor.Wallet.local().publicKey, oracleQueue: Queue })
+      .rpc();
+
+    console.log("tx: ", tx);
+
+    await sleep(5000); // takes 3-5 seconds
+
+    const userData = await program.account.userAccount.fetch(userAccount);
+    console.log("new user data: ", userData.data.toString());
   });
 
   it("Delegate to Ephemeral Rollup!", async () => {
@@ -99,15 +128,34 @@ describe("er-state-account", () => {
     });
     const txCommitSgn = await GetCommitmentSignature(
       txHash,
-      providerEphemeralRollup.connection,
+      providerEphemeralRollup.connection
     );
 
     console.log("\nUser Account State Updated: ", txHash);
   });
 
+  it("Update state using randomness (delegated)", async () => {
+    const seed = Math.floor(Math.random() * 255);
+
+    const tx = await ephemeralProgram.methods
+      .requestData(seed)
+      .accounts({
+        payer: anchor.Wallet.local().publicKey,
+        oracleQueue: ERQueue,
+      })
+      .rpc();
+
+    console.log("tx: ", tx);
+
+    await sleep(5000); // takes 3-5 seconds
+
+    const userData = await program.account.userAccount.fetch(userAccount);
+    console.log("new user data: ", userData.data.toString());
+  });
+
   it("Commit and undelegate from Ephemeral Rollup!", async () => {
     let info = await providerEphemeralRollup.connection.getAccountInfo(
-      userAccount,
+      userAccount
     );
 
     console.log("User Account Info: ", info);
@@ -132,7 +180,7 @@ describe("er-state-account", () => {
     });
     const txCommitSgn = await GetCommitmentSignature(
       txHash,
-      providerEphemeralRollup.connection,
+      providerEphemeralRollup.connection
     );
 
     console.log("\nUser Account Undelegated: ", txHash);
@@ -162,3 +210,7 @@ describe("er-state-account", () => {
     console.log("\nUser Account Closed: ", tx);
   });
 });
+
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
