@@ -6,7 +6,9 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
-    "@magicblock-labs/ephemeral-rollups-sdk": "^0.8.5"
+    "@helium/tuktuk-sdk": "^0.0.10",
+    "@magicblock-labs/ephemeral-rollups-sdk": "^0.8.5",
+    "axios": "^1.13.5"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",

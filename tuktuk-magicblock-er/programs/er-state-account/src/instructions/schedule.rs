@@ -5,10 +5,7 @@ use anchor_lang::{prelude::*, InstructionData};
 use tuktuk_program::{
     compile_transaction,
     tuktuk::{
-        cpi::{
-            accounts::{InitializeTaskQueueV0, QueueTaskV0},
-            initialize_task_queue_v0, queue_task_v0,
-        },
+        cpi::{accounts::QueueTaskV0, queue_task_v0},
         program::Tuktuk,
         types::TriggerV0,
     },

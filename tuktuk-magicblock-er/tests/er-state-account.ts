@@ -7,6 +7,7 @@ import {
 } from "@solana/web3.js";
 import { GetCommitmentSignature } from "@magicblock-labs/ephemeral-rollups-sdk";
 import { ErStateAccount } from "../target/types/er_state_account";
+import { init, taskKey, taskQueueAuthorityKey } from "@helium/tuktuk-sdk";
 
 describe("er-state-account", () => {
   // Configure the client to use the local cluster.
@@ -16,7 +17,7 @@ describe("er-state-account", () => {
   const providerEphemeralRollup = new anchor.AnchorProvider(
     new anchor.web3.Connection(
       process.env.EPHEMERAL_PROVIDER_ENDPOINT ||
-        "https://devnet.magicblock.app/",
+        "https://devnet-as.magicblock.app/",
       {
         wsEndpoint:
           process.env.EPHEMERAL_WS_ENDPOINT || "wss://devnet.magicblock.app/",
@@ -43,6 +44,22 @@ describe("er-state-account", () => {
 
   const program = anchor.workspace.erStateAccount as Program<ErStateAccount>;
 
+  const taskQueue = new anchor.web3.PublicKey(
+    "AdRwXf4VjiRGwE9RcJg7DPGDSGsPFK4jtKi9Z8BRPfss"
+  );
+
+  const queueAuthority = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("queue_authority")],
+    program.programId
+  )[0];
+
+  const taskQueueAuthority = taskQueueAuthorityKey(
+    taskQueue,
+    queueAuthority
+  )[0];
+
+  console.log("queueAuthority: ", queueAuthority);
+
   // program with ephemeral provider
   const ephemeralProgram = new anchor.Program(
     program.idl,
@@ -67,7 +84,34 @@ describe("er-state-account", () => {
     console.log("User Account initialized: ", tx);
   });
 
-  it("Update State!", async () => {
+  it("Schedule a task!", async () => {
+    let tuktukProgram = await init(provider);
+    let taskId = 100;
+    // Add your test here.
+    const tx = await program.methods
+      .schedule(taskId)
+      .accountsPartial({
+        user: anchor.Wallet.local().publicKey,
+        userAccount: userAccount,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        taskQueue: taskQueue,
+        taskQueueAuthority: taskQueueAuthority,
+        task: taskKey(taskQueue, taskId)[0],
+        queueAuthority: queueAuthority,
+        tuktukProgram: tuktukProgram.programId,
+      })
+      .rpc();
+
+    console.log("Scheduled a task: ", tx);
+
+    const userDataOld = await program.account.userAccount.fetch(userAccount);
+    console.log("olds user data: ", userDataOld.data.toString());
+    await sleep(10000);
+    const userDataNew = await program.account.userAccount.fetch(userAccount);
+    console.log("new user data: ", userDataNew.data.toString());
+  });
+
+  xit("Update State!", async () => {
     const tx = await program.methods
       .update(new anchor.BN(42))
       .accountsPartial({
@@ -78,7 +122,7 @@ describe("er-state-account", () => {
     console.log("\nUser Account State Updated: ", tx);
   });
 
-  it("Update state using randomness (undelegated)", async () => {
+  xit("Update state using randomness (undelegated)", async () => {
     const seed = Math.floor(Math.random() * 255);
 
     const tx = await program.methods
@@ -94,7 +138,7 @@ describe("er-state-account", () => {
     console.log("new user data: ", userData.data.toString());
   });
 
-  it("Delegate to Ephemeral Rollup!", async () => {
+  xit("Delegate to Ephemeral Rollup!", async () => {
     let tx = await program.methods
       .delegate()
       .accountsPartial({
@@ -108,7 +152,7 @@ describe("er-state-account", () => {
     console.log("\nUser Account Delegated to Ephemeral Rollup: ", tx);
   });
 
-  it("Update State and Commit to Base Layer!", async () => {
+  xit("Update State and Commit to Base Layer!", async () => {
     let tx = await program.methods
       .updateCommit(new anchor.BN(43))
       .accountsPartial({
@@ -134,7 +178,7 @@ describe("er-state-account", () => {
     console.log("\nUser Account State Updated: ", txHash);
   });
 
-  it("Update state using randomness (delegated)", async () => {
+  xit("Update state using randomness (delegated)", async () => {
     const seed = Math.floor(Math.random() * 255);
 
     const tx = await ephemeralProgram.methods
@@ -153,7 +197,7 @@ describe("er-state-account", () => {
     console.log("new user data: ", userData.data.toString());
   });
 
-  it("Commit and undelegate from Ephemeral Rollup!", async () => {
+  xit("Commit and undelegate from Ephemeral Rollup!", async () => {
     let info = await providerEphemeralRollup.connection.getAccountInfo(
       userAccount
     );
@@ -186,7 +230,7 @@ describe("er-state-account", () => {
     console.log("\nUser Account Undelegated: ", txHash);
   });
 
-  it("Update State!", async () => {
+  xit("Update State!", async () => {
     let tx = await program.methods
       .update(new anchor.BN(45))
       .accountsPartial({

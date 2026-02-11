@@ -9,7 +9,7 @@ mod state;
 
 use instructions::*;
 
-declare_id!("GNfV8aZjjgrnDxebPAEFVJH7YJAZzV8F18FRPjpZQSH6");
+declare_id!("5De2Mvi7cu32byUTdWTdsX8MrepRaBuAGaYdokEbErPv");
 
 #[ephemeral]
 #[program]
@@ -65,7 +65,7 @@ pub mod er_state_account {
         Ok(())
     }
 
-    pub fn schedule_update_user(ctx: Context<Schedule>, task_id: u16) -> Result<()> {
+    pub fn schedule(ctx: Context<Schedule>, task_id: u16) -> Result<()> {
         ctx.accounts.schedule(task_id, &ctx.bumps)?;
 
         Ok(())
