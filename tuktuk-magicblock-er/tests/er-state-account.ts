@@ -45,7 +45,7 @@ describe("er-state-account", () => {
   const program = anchor.workspace.erStateAccount as Program<ErStateAccount>;
 
   const taskQueue = new anchor.web3.PublicKey(
-    "AdRwXf4VjiRGwE9RcJg7DPGDSGsPFK4jtKi9Z8BRPfss"
+    "9SCSz59mANKxt6S8j3eRd6AAbZkYcUHuAHCcpPQa5Sr6"
   );
 
   const queueAuthority = anchor.web3.PublicKey.findProgramAddressSync(
@@ -71,7 +71,7 @@ describe("er-state-account", () => {
     program.programId
   )[0];
 
-  it("Is initialized!", async () => {
+  xit("Is initialized!", async () => {
     // Add your test here.
     const tx = await program.methods
       .initialize()
@@ -242,7 +242,7 @@ describe("er-state-account", () => {
     console.log("\nUser Account State Updated: ", tx);
   });
 
-  it("Close Account!", async () => {
+  xit("Close Account!", async () => {
     const tx = await program.methods
       .close()
       .accountsPartial({

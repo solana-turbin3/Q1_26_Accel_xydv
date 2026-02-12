@@ -1,4 +1,4 @@
-tuktuk -u https://api.devnet.solana.com task-queue create --name magicblock-test-1 --capacity 1000 --funding-amount 100000000 --queue-authority AJvghTd4HpB7vQzJJX42HhCak5cyQAkh3u8SGN1JQVVG --min-crank-reward 1000001 --stale-task-age 10000
+tuktuk -u https://api.devnet.solana.com task-queue create --name magicblock-test-2 --capacity 1000 --funding-amount 100000000 --queue-authority AJvghTd4HpB7vQzJJX42HhCak5cyQAkh3u8SGN1JQVVG --min-crank-reward 1000001 --stale-task-age 10000
 
 {
   "pubkey": "AdRwXf4VjiRGwE9RcJg7DPGDSGsPFK4jtKi9Z8BRPfss",
@@ -11,5 +11,11 @@ tuktuk -u https://api.devnet.solana.com task-queue create --name magicblock-test
   "stale_task_age": 10000
 }
 
-tuktuk -u https://api.devnet.solana.com task-queue add-queue-authority --task-queue-name magicblock-test-1 --queue-authority 7ZGeNDm791nS8dMagF2XCjuB2WYSUAsjpqdMmmfgEh1m
+tuktuk -u https://api.devnet.solana.com task-queue add-queue-authority --task-queue-name magicblock-test-2 --queue-authority 4UgdXkESGSmkytccZkvL93okF66GK3oBjJ76Jg4dUX2A
 
+tuktuk -u https://api.devnet.solana.com task-queue remove-queue-authority --task-queue-name magicblock-test-1 --queue-authority 7ZGeNDm791nS8dMagF2XCjuB2WYSUAsjpqdMmmfgEh1m
+
+tuktuk -u https://api.devnet.solana.com task-queue close --task-queue-name magicblock-test-1
+
+tuktuk -u https://api.devnet.solana.com cron list
+tuktuk -u https://api.devnet.solana.com cron requeue --cron-name tuktuk-magicblock-cron-1
