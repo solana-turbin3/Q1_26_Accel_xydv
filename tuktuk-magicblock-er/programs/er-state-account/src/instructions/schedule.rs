@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::{prelude::*, InstructionData};
+use ephemeral_vrf_sdk::anchor::vrf;
 use tuktuk_program::{
     compile_transaction,
     tuktuk::{
@@ -15,6 +16,7 @@ use tuktuk_program::{
 
 use crate::state::UserAccount;
 
+#[vrf]
 #[derive(Accounts)]
 pub struct Schedule<'info> {
     #[account(
@@ -29,6 +31,12 @@ pub struct Schedule<'info> {
         bump = user_account.bump,
     )]
     pub user_account: Account<'info, UserAccount>,
+
+    /// CHECK: queue
+    #[account(mut, address = ephemeral_vrf_sdk::consts::DEFAULT_QUEUE)]
+    pub oracle_queue: AccountInfo<'info>,
+
+    // TUKTUK
     #[account(mut)]
     /// CHECK: Don't need to parse this account, just using it in CPI
     pub task_queue: UncheckedAccount<'info>,
@@ -53,14 +61,19 @@ impl<'info> Schedule<'info> {
         let (compiled_tx, _) = compile_transaction(
             vec![Instruction {
                 program_id: crate::ID,
-                accounts: crate::__client_accounts_update_user::UpdateUser {
-                    user: self.user.key(),
-                    user_account: self.user_account.key(),
+                accounts: crate::__client_accounts_request_data::RequestData {
+                    payer: self.user.key(),
+                    user: self.user_account.key(),
+                    oracle_queue: self.oracle_queue.key(),
+                    program_identity: self.program_identity.key(),
+                    vrf_program: self.vrf_program.key(),
+                    slot_hashes: self.slot_hashes.key(),
+                    system_program: self.system_program.key(),
                 }
                 .to_account_metas(None)
                 .to_vec(),
-                data: crate::instruction::Update {
-                    new_data: Clock::get()?.unix_timestamp as u64,
+                data: crate::instruction::RequestData {
+                    client_seed: task_id as u8,
                 }
                 .data(),
             }],

@@ -19,3 +19,9 @@ tuktuk -u https://api.devnet.solana.com task-queue close --task-queue-name magic
 
 tuktuk -u https://api.devnet.solana.com cron list
 tuktuk -u https://api.devnet.solana.com cron requeue --cron-name tuktuk-magicblock-cron-1
+
+// get task for queue
+tuktuk -u https://api.devnet.solana.com task list --task-queue-name magicblock-test-2
+
+// close task
+tuktuk -u https://api.devnet.solana.com task close --task-queue-name magicblock-test-2 --task-id <task-id>

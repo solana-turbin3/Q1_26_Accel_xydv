@@ -93,6 +93,10 @@ describe("er-state-account", () => {
       .accountsPartial({
         user: anchor.Wallet.local().publicKey,
         userAccount: userAccount,
+        oracleQueue: Queue,
+        // vrfProgram: new PublicKey(
+        //   "Vrf1RNUjXmQGjmQrQLvJHs9SNkvDJEsRVFPkfSQUwGz"
+        // ),
         systemProgram: anchor.web3.SystemProgram.programId,
         taskQueue: taskQueue,
         taskQueueAuthority: taskQueueAuthority,
@@ -105,10 +109,13 @@ describe("er-state-account", () => {
     console.log("Scheduled a task: ", tx);
 
     const userDataOld = await program.account.userAccount.fetch(userAccount);
-    console.log("olds user data: ", userDataOld.data.toString());
+    console.log("old user data: ", userDataOld.data.toString());
+    console.log("waiting for tuktuk to run tx");
     await sleep(10000);
-    const userDataNew = await program.account.userAccount.fetch(userAccount);
-    console.log("new user data: ", userDataNew.data.toString());
+    console.log("waiting for vrf callback");
+    await sleep(10000);
+    const userDataVrf = await program.account.userAccount.fetch(userAccount);
+    console.log("new user data (vrf callback): ", userDataVrf.data.toString());
   });
 
   xit("Update State!", async () => {

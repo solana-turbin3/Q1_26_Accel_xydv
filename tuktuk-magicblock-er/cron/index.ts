@@ -13,6 +13,7 @@ import {
 } from "@helium/tuktuk-sdk";
 import {
   LAMPORTS_PER_SOL,
+  PublicKey,
   SystemProgram,
   TransactionInstruction,
 } from "@solana/web3.js";
@@ -144,10 +145,12 @@ async function main() {
     ]);
 
     const updateInstruction = await erProgram.methods
-      .update(new anchor.BN(Date.now()))
+      .requestData(10)
       .accountsPartial({
-        user: wallet.publicKey,
-        userAccount,
+        payer: wallet.publicKey,
+        oracleQueue: new PublicKey(
+          "Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh"
+        ),
       })
       .instruction();
 
