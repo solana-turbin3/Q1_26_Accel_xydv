@@ -9,8 +9,11 @@ pub trait Serializer<T> {
     fn from_bytes(&self, bytes: &[u8]) -> Result<T, Box<dyn std::error::Error>>;
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Borsh;
+#[derive(Debug, PartialEq)]
 pub struct Wincode;
+#[derive(Debug, PartialEq)]
 pub struct Json;
 
 impl<T> Serializer<T> for Borsh
@@ -63,6 +66,10 @@ pub trait StorageMethods<T, S> {
     fn save(&mut self, data: &T) -> Result<(), Box<dyn std::error::Error>>;
     fn load(&self) -> Result<T, Box<dyn std::error::Error>>;
     fn has_data(&self) -> bool;
+    fn convert<R: Serializer<T>>(
+        &self,
+        serializer: R,
+    ) -> Result<Storage<T, R>, Box<dyn std::error::Error>>;
 }
 
 impl<T, S> StorageMethods<T, S> for Storage<T, S>
@@ -93,6 +100,21 @@ where
 
     fn has_data(&self) -> bool {
         self.bytes.is_some()
+    }
+
+    fn convert<R: Serializer<T>>(
+        &self,
+        serializer: R,
+    ) -> Result<Storage<T, R>, Box<dyn std::error::Error>> {
+        if !self.has_data() {
+            return Ok(Storage::new(serializer));
+        };
+
+        let data = self.load()?;
+        let mut storage = Storage::new(serializer);
+        storage.save(&data)?;
+
+        Ok(storage)
     }
 }
 
@@ -157,6 +179,23 @@ mod tests {
         let mut storage = Storage::new(Json);
         storage.save(&person).unwrap();
 
+        assert!(storage.has_data());
+        assert_eq!(storage.load().unwrap(), person);
+    }
+
+    #[test]
+    fn test_conversion() {
+        let person = Person {
+            name: "aditya".to_string(),
+            age: 21,
+            gender: true,
+        };
+
+        let mut storage = Storage::new(Json);
+        storage.save(&person).unwrap();
+        let new_storage = storage.convert(Wincode).unwrap();
+
+        assert_eq!(new_storage.serializer, Wincode);
         assert!(storage.has_data());
         assert_eq!(storage.load().unwrap(), person);
     }

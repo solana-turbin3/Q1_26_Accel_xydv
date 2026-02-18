@@ -8,3 +8,10 @@ borsh = { version = "1.6.0", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 wincode = { version = "0.4.4", features = ["derive"] }
+
+[dev-dependencies]
+criterion = { version = "0.8", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark"
+harness = false
