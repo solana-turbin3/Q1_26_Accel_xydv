@@ -4,14 +4,14 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use serde::{Deserialize, Serialize};
 use wincode::{SchemaRead, SchemaWrite, config::DefaultConfig};
 
-trait Serializer<T> {
+pub trait Serializer<T> {
     fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Box<dyn std::error::Error>>;
     fn from_bytes(&self, bytes: &[u8]) -> Result<T, Box<dyn std::error::Error>>;
 }
 
-struct Borsh;
-struct Wincode;
-struct Json;
+pub struct Borsh;
+pub struct Wincode;
+pub struct Json;
 
 impl<T> Serializer<T> for Borsh
 where
@@ -52,14 +52,14 @@ where
     }
 }
 
-struct Storage<T, S> {
-    bytes: Option<Vec<u8>>, // option, since it can be empty
-    serializer: S,
-    phantom: PhantomData<T>,
+pub struct Storage<T, S> {
+    pub bytes: Option<Vec<u8>>, // option, since it can be empty
+    pub serializer: S,
+    pub phantom: PhantomData<T>,
 }
 
-trait StorageMethods<T, S> {
-    fn new(&self, serializer: S) -> Self;
+pub trait StorageMethods<T, S> {
+    fn new(serializer: S) -> Self;
     fn save(&mut self, data: &T) -> Result<(), Box<dyn std::error::Error>>;
     fn load(&self) -> Result<T, Box<dyn std::error::Error>>;
     fn has_data(&self) -> bool;
@@ -69,7 +69,7 @@ impl<T, S> StorageMethods<T, S> for Storage<T, S>
 where
     S: Serializer<T>,
 {
-    fn new(&self, serializer: S) -> Self {
+    fn new(serializer: S) -> Self {
         Self {
             bytes: None,
             serializer,
@@ -93,5 +93,71 @@ where
 
     fn has_data(&self) -> bool {
         self.bytes.is_some()
+    }
+}
+
+#[derive(
+    Debug,
+    PartialEq,
+    BorshSerialize,
+    BorshDeserialize,
+    SchemaRead,
+    SchemaWrite,
+    Serialize,
+    Deserialize,
+)]
+pub struct Person {
+    pub name: String,
+    pub age: u8,
+    pub gender: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_borsh() {
+        let person = Person {
+            name: "aditya".to_string(),
+            age: 21,
+            gender: true,
+        };
+
+        let mut storage = Storage::new(Borsh);
+        storage.save(&person).unwrap();
+
+        assert!(storage.has_data());
+        assert_eq!(storage.load().unwrap(), person);
+    }
+
+    #[test]
+    fn test_wincode() {
+        let person = Person {
+            name: "aditya".to_string(),
+            age: 21,
+            gender: true,
+        };
+
+        let mut storage = Storage::new(Wincode);
+        storage.save(&person).unwrap();
+
+        assert!(storage.has_data());
+        assert_eq!(storage.load().unwrap(), person);
+    }
+
+    #[test]
+    fn test_json() {
+        let person = Person {
+            name: "aditya".to_string(),
+            age: 21,
+            gender: true,
+        };
+
+        let mut storage = Storage::new(Json);
+        storage.save(&person).unwrap();
+
+        assert!(storage.has_data());
+        assert_eq!(storage.load().unwrap(), person);
     }
 }
