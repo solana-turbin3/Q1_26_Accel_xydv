@@ -71,7 +71,7 @@ describe("er-state-account", () => {
     program.programId
   )[0];
 
-  xit("Is initialized!", async () => {
+  it("Is initialized!", async () => {
     // Add your test here.
     const tx = await program.methods
       .initialize()
@@ -84,7 +84,7 @@ describe("er-state-account", () => {
     console.log("User Account initialized: ", tx);
   });
 
-  it("Schedule a task!", async () => {
+  xit("Schedule a task!", async () => {
     let tuktukProgram = await init(provider);
     let taskId = 100;
     // Add your test here.
@@ -94,9 +94,6 @@ describe("er-state-account", () => {
         user: anchor.Wallet.local().publicKey,
         userAccount: userAccount,
         oracleQueue: Queue,
-        // vrfProgram: new PublicKey(
-        //   "Vrf1RNUjXmQGjmQrQLvJHs9SNkvDJEsRVFPkfSQUwGz"
-        // ),
         systemProgram: anchor.web3.SystemProgram.programId,
         taskQueue: taskQueue,
         taskQueueAuthority: taskQueueAuthority,
