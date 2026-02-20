@@ -5,8 +5,10 @@ use serde::{Deserialize, Serialize};
 use wincode::{SchemaRead, SchemaWrite, config::DefaultConfig};
 
 pub trait Serializer<T> {
-    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Box<dyn std::error::Error>>;
-    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Box<dyn std::error::Error>>;
+    type Error: std::fmt::Debug + std::error::Error; // suggested by bijoy
+
+    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Self::Error>;
+    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Self::Error>;
 }
 
 #[derive(Debug, PartialEq)]
@@ -20,11 +22,13 @@ impl<T> Serializer<T> for Borsh
 where
     T: BorshSerialize + BorshDeserialize,
 {
-    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    type Error = std::io::Error;
+
+    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Self::Error> {
         borsh::to_vec(data).map_err(|e| e.into())
     }
 
-    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Box<dyn std::error::Error>> {
+    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Self::Error> {
         borsh::from_slice(bytes).map_err(|e| e.into())
     }
 }
@@ -33,11 +37,12 @@ impl<T> Serializer<T> for Wincode
 where
     T: for<'a> SchemaRead<'a, DefaultConfig, Dst = T> + SchemaWrite<DefaultConfig, Src = T>,
 {
-    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    type Error = wincode::Error;
+    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Self::Error> {
         wincode::serialize(data).map_err(|e| e.into())
     }
 
-    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Box<dyn std::error::Error>> {
+    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Self::Error> {
         wincode::deserialize(bytes).map_err(|e| e.into())
     }
 }
@@ -46,11 +51,13 @@ impl<T> Serializer<T> for Json
 where
     T: Serialize + for<'a> Deserialize<'a>,
 {
-    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    type Error = serde_json::Error;
+
+    fn to_bytes(&self, data: &T) -> Result<Vec<u8>, Self::Error> {
         serde_json::to_vec(data).map_err(|e| e.into())
     }
 
-    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Box<dyn std::error::Error>> {
+    fn from_bytes(&self, bytes: &[u8]) -> Result<T, Self::Error> {
         serde_json::from_slice(bytes).map_err(|e| e.into())
     }
 }
@@ -85,14 +92,14 @@ where
     }
 
     fn save(&mut self, data: &T) -> Result<(), Box<dyn std::error::Error>> {
-        let bytes = self.serializer.to_bytes(data)?;
+        let bytes = self.serializer.to_bytes(data).unwrap();
         self.bytes = Some(bytes);
         Ok(())
     }
 
     fn load(&self) -> Result<T, Box<dyn std::error::Error>> {
         if let Some(bytes) = &self.bytes {
-            return Ok(self.serializer.from_bytes(bytes)?);
+            return Ok(self.serializer.from_bytes(bytes).unwrap());
         }
 
         Err("error".into())
