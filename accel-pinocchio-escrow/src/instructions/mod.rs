@@ -1,18 +1,25 @@
 pub mod make;
-// pub mod makev2;
+pub mod makev2;
 pub mod refund;
+pub mod refundv2;
 pub mod take;
+pub mod takev2;
 
 pub use make::*;
+pub use makev2::*;
 use pinocchio::error::ProgramError;
 pub use refund::*;
+pub use refundv2::*;
 pub use take::*;
+pub use takev2::*;
 
 pub enum EscrowInstrctions {
     Make = 0,
     Take = 1,
     Cancel = 2,
     MakeV2 = 3,
+    TakeV2 = 4,
+    CancelV2 = 5,
 }
 
 impl TryFrom<&u8> for EscrowInstrctions {
@@ -24,6 +31,8 @@ impl TryFrom<&u8> for EscrowInstrctions {
             1 => Ok(EscrowInstrctions::Take),
             2 => Ok(EscrowInstrctions::Cancel),
             3 => Ok(EscrowInstrctions::MakeV2),
+            4 => Ok(EscrowInstrctions::TakeV2),
+            5 => Ok(EscrowInstrctions::CancelV2),
             _ => Err(ProgramError::InvalidInstructionData),
         }
     }
