@@ -7,3 +7,9 @@
 [submodule "accel-challenge-week3-breakout4"]
 	path = accel-challenge-week3-breakout4
 	url = https://github.com/solana-turbin3/accel-challenge-week3-breakout4
+[submodule "Q1_26_Accel_xydv"]
+	path = Q1_26_Accel_xydv
+	url = https://github.com/solana-turbin3/Q1_26_Accel_xydv
+[submodule "pinocchio-fundraiser"]
+	path = pinocchio-fundraiser
+	url = https://github.com/xydv/pinocchio-fundraiser
