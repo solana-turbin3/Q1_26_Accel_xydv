@@ -16,7 +16,6 @@ mod tests {
     use solana_pubkey::Pubkey;
     use solana_signer::Signer;
     use solana_transaction::Transaction;
-    use spl_associated_token_account::get_associated_token_address;
 
     const PROGRAM_ID: &str = "4ibrEMW5F6hKnkW4jVedswYv6H6VtwPN6ar6dvXDN1nT";
     const TOKEN_PROGRAM_ID: Pubkey = spl_token::ID;
@@ -38,7 +37,7 @@ mod tests {
             .expect("Airdrop failed");
 
         // Load program SO file
-        println!("The path is!! {}", env!("CARGO_MANIFEST_DIR"));
+        // println!("The path is!! {}", env!("CARGO_MANIFEST_DIR"));
         let so_path = PathBuf::from("target/deploy/escrow.so");
 
         let program_data = std::fs::read(so_path).expect("Failed to read program SO file");
@@ -157,7 +156,7 @@ mod tests {
         let amount_to_give: u64 = 500000000; // 500 tokens with 6 decimal places
         let bump: u8 = escrow.1;
 
-        println!("Bump: {}", bump);
+        // println!("Bump: {}", bump);
 
         // Create the "Make" instruction to deposit tokens into the escrow
         let make_data = [
@@ -456,7 +455,7 @@ mod tests {
         let tx = svm.send_transaction(transaction).unwrap();
 
         // Log transaction details
-        println!("\n\nMake transaction sucessfull");
+        println!("\n\nMakeV2 transaction sucessfull");
         println!("CUs Consumed: {}", tx.compute_units_consumed);
     }
 
@@ -556,7 +555,7 @@ mod tests {
         let tx = svm.send_transaction(transaction).unwrap();
 
         // Log transaction details
-        println!("\n\nTake transaction sucessfull");
+        println!("\n\nTakeV2 transaction sucessfull");
         println!("CUs Consumed: {}", tx.compute_units_consumed);
     }
 
@@ -649,7 +648,7 @@ mod tests {
         let tx = svm.send_transaction(transaction).unwrap();
 
         // Log transaction details
-        println!("\n\nRefund transaction successful");
+        println!("\n\nRefundV2 transaction successful");
         println!("CUs Consumed: {}", tx.compute_units_consumed);
     }
 }
