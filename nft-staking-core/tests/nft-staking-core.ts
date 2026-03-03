@@ -198,7 +198,42 @@ describe("nft-staking-core", () => {
     console.log("\nTime traveled in days", TIME_TRAVEL_IN_DAYS);
   });
 
-  it("Unstake an NFT", async () => {
+  it("Burn staked NFT", async () => {
+    // Get the user rewards ATA account
+    const userRewardsAta = getAssociatedTokenAddressSync(
+      rewardsMint,
+      provider.wallet.publicKey,
+      false,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+
+    const tx = await program.methods
+      .burnStakedNft()
+      .accountsPartial({
+        user: provider.wallet.publicKey,
+        updateAuthority,
+        config,
+        rewardsMint,
+        userRewardsAta,
+        nft: nftKeypair.publicKey,
+        collection: collectionKeypair.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    console.log("\nYour transaction signature", tx);
+    console.log(
+      "User rewards balance",
+      (await provider.connection.getTokenAccountBalance(userRewardsAta)).value
+        .uiAmount
+    );
+  });
+
+  xit("Unstake an NFT", async () => {
     // Get the user rewards ATA account
     const userRewardsAta = getAssociatedTokenAddressSync(
       rewardsMint,

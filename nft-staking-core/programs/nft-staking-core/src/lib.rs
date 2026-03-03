@@ -43,4 +43,8 @@ pub mod nft_staking_core {
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         ctx.accounts.claim_rewards(&ctx.bumps)
     }
+
+    pub fn burn_staked_nft(ctx: Context<BurnStakedNft>) -> Result<()> {
+        ctx.accounts.burn_staked_nft(&ctx.bumps)
+    }
 }
