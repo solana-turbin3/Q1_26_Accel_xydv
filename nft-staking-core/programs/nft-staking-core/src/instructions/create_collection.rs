@@ -1,5 +1,9 @@
 use anchor_lang::prelude::*;
-use mpl_core::{instructions::CreateCollectionV2CpiBuilder, ID as MPL_CORE_ID};
+use mpl_core::{
+    instructions::{AddCollectionPluginV1CpiBuilder, CreateCollectionV2CpiBuilder},
+    types::{Attribute, Attributes, Plugin, PluginAuthority},
+    ID as MPL_CORE_ID,
+};
 
 #[derive(Accounts)]
 pub struct CreateCollection<'info> {
@@ -42,6 +46,21 @@ impl<'info> CreateCollection<'info> {
             .system_program(&self.system_program.to_account_info())
             .name(name)
             .uri(uri)
+            .invoke_signed(&[signer_seeds])?;
+
+        // add total_staked attribute
+        AddCollectionPluginV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
+            .collection(&self.collection.to_account_info())
+            .payer(&self.payer.to_account_info())
+            .authority(Some(&self.update_authority.to_account_info()))
+            .system_program(&self.system_program.to_account_info())
+            .plugin(Plugin::Attributes(Attributes {
+                attribute_list: vec![Attribute {
+                    key: "total_staked".to_string(),
+                    value: "0".to_string(),
+                }],
+            }))
+            .init_authority(PluginAuthority::UpdateAuthority)
             .invoke_signed(&[signer_seeds])?;
 
         Ok(())
