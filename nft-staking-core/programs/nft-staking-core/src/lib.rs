@@ -39,4 +39,8 @@ pub mod nft_staking_core {
     pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
         ctx.accounts.unstake(&ctx.bumps)
     }
+
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
+        ctx.accounts.claim_rewards(&ctx.bumps)
+    }
 }

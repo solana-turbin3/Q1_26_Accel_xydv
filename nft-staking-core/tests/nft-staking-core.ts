@@ -146,7 +146,49 @@ describe("nft-staking-core", () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  it("Time travel to the future", async () => {
+  it("Time travel 1 day", async () => {
+    // Advance time in milliseconds
+    const currentTimestamp = Date.now();
+    await advanceTime({
+      absoluteTimestamp: currentTimestamp + 1 * MILLISECONDS_PER_DAY,
+    });
+    console.log("\nTime traveled in days", 1);
+  });
+
+  it("claim rewards without unstaking", async () => {
+    // Get the user rewards ATA account
+    const userRewardsAta = getAssociatedTokenAddressSync(
+      rewardsMint,
+      provider.wallet.publicKey,
+      false,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    const tx = await program.methods
+      .claimRewards()
+      .accountsPartial({
+        user: provider.wallet.publicKey,
+        updateAuthority,
+        config,
+        rewardsMint,
+        userRewardsAta,
+        nft: nftKeypair.publicKey,
+        collection: collectionKeypair.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+    console.log("\nYour transaction signature", tx);
+    console.log(
+      "User rewards balance",
+      (await provider.connection.getTokenAccountBalance(userRewardsAta)).value
+        .uiAmount
+    );
+  });
+
+  it("Time travel 8 days", async () => {
     // Advance time in milliseconds
     const currentTimestamp = Date.now();
     await advanceTime({
