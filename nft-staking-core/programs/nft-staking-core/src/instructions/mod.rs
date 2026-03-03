@@ -4,7 +4,9 @@ pub mod create_collection;
 pub mod init_config;
 pub mod mint_nft;
 pub mod stake;
+pub mod transfer;
 pub mod unstake;
+pub mod update_oracle;
 
 pub use burn_staked_nft::*;
 pub use claim_rewards::*;
@@ -12,4 +14,6 @@ pub use create_collection::*;
 pub use init_config::*;
 pub use mint_nft::*;
 pub use stake::*;
+pub use transfer::*;
 pub use unstake::*;
+pub use update_oracle::*;

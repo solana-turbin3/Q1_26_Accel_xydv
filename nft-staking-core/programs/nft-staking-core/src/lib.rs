@@ -1,8 +1,10 @@
 use anchor_lang::prelude::*;
 
 mod errors;
+mod helpers;
 mod instructions;
 mod state;
+
 use instructions::*;
 
 declare_id!("72Zim5YCQs4goV9mhSAJJwGL4ELgNjjmkKxWC3dSmgGZ");
@@ -46,5 +48,13 @@ pub mod nft_staking_core {
 
     pub fn burn_staked_nft(ctx: Context<BurnStakedNft>) -> Result<()> {
         ctx.accounts.burn_staked_nft(&ctx.bumps)
+    }
+
+    pub fn transfer(ctx: Context<Transfer>) -> Result<()> {
+        ctx.accounts.transfer()
+    }
+
+    pub fn update_oracle(ctx: Context<UpdateOracle>) -> Result<()> {
+        ctx.accounts.update_oracle()
     }
 }

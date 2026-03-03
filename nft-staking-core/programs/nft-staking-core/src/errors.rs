@@ -18,4 +18,6 @@ pub enum StakingError {
     Overflow,
     #[msg("Invalid number")]
     InvalidNumber,
+    #[msg("Already updated")]
+    AlreadyUpdated,
 }

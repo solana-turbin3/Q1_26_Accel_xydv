@@ -1,8 +1,10 @@
-use crate::errors::StakingError;
-use crate::state::Config;
+use crate::helpers::is_allowed;
+use crate::state::{Config, ExternalValidationResult, OracleValidation};
+use crate::{errors::StakingError, state::Oracle};
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenInterface};
 use mpl_core::accounts::BaseCollectionV1;
+// use mpl_core::types::{ExternalValidationResult, OracleValidation};
 
 #[derive(Accounts)]
 pub struct InitConfig<'info> {
@@ -24,6 +26,20 @@ pub struct InitConfig<'info> {
         bump
     )]
     pub config: Account<'info, Config>,
+    #[account(
+        init,
+        payer = admin,
+        space = Oracle::INIT_SPACE,
+        seeds = [b"oracle"],
+        bump
+    )]
+    pub oracle: Account<'info, Oracle>,
+    #[account(
+        mut,
+        seeds = [b"reward_vault", oracle.key().as_ref()],
+        bump
+    )]
+    pub reward_vault: SystemAccount<'info>,
     #[account(
         init,
         payer = admin,
@@ -57,6 +73,34 @@ impl InitConfig<'_> {
             rewards_bump: bumps.rewards_mint,
             config_bump: bumps.config,
         });
+
+        // initialize Oracle data
+        match is_allowed(Clock::get()?.unix_timestamp) {
+            true => {
+                self.oracle.set_inner(Oracle {
+                    validation: OracleValidation::V1 {
+                        transfer: ExternalValidationResult::Approved,
+                        create: ExternalValidationResult::Pass,
+                        update: ExternalValidationResult::Pass,
+                        burn: ExternalValidationResult::Pass,
+                    },
+                    bump: bumps.oracle,
+                    vault_bump: bumps.reward_vault,
+                });
+            }
+            false => {
+                self.oracle.set_inner(Oracle {
+                    validation: OracleValidation::V1 {
+                        transfer: ExternalValidationResult::Rejected,
+                        create: ExternalValidationResult::Pass,
+                        update: ExternalValidationResult::Pass,
+                        burn: ExternalValidationResult::Pass,
+                    },
+                    bump: bumps.oracle,
+                    vault_bump: bumps.reward_vault,
+                });
+            }
+        }
 
         Ok(())
     }
