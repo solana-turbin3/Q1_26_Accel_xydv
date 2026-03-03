@@ -1,8 +1,5 @@
 use anchor_lang::prelude::*;
-use mpl_core::{
-    ID as MPL_CORE_ID,
-    instructions::CreateV2CpiBuilder,
-};
+use mpl_core::{instructions::CreateV2CpiBuilder, ID as MPL_CORE_ID};
 
 #[derive(Accounts)]
 pub struct Mint<'info> {
@@ -24,9 +21,9 @@ pub struct Mint<'info> {
     #[account(address = MPL_CORE_ID)]
     pub mpl_core_program: UncheckedAccount<'info>,
 }
+
 impl<'info> Mint<'info> {
     pub fn mint_nft(&mut self, name: String, uri: String, bumps: &MintBumps) -> Result<()> {
-
         // Signer seeds for the update authority
         let collection_key = self.collection.key();
         let signer_seeds = &[
