@@ -27,7 +27,6 @@ pub struct Transfer<'info> {
     pub new_owner: AccountInfo<'info>,
 
     #[account(
-        mut,
         seeds = [b"oracle"],
         bump = oracle.bump,
     )]

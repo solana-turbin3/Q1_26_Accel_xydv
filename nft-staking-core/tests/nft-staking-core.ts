@@ -239,7 +239,7 @@ describe("nft-staking-core", () => {
         .signers([])
         .rpc({ skipPreflight: true });
     } catch (e) {
-      // console.log(e);
+      console.log(e);
     }
   });
 
@@ -377,6 +377,7 @@ describe("nft-staking-core", () => {
       TOKEN_PROGRAM_ID,
       ASSOCIATED_TOKEN_PROGRAM_ID
     );
+
     const tx = await program.methods
       .unstake()
       .accountsPartial({

@@ -1,6 +1,6 @@
 use crate::errors::StakingError;
 use crate::state::Config;
-use anchor_lang::prelude::*;
+use anchor_lang::prelude::{clock::SECONDS_PER_DAY, *};
 use anchor_spl::{
     associated_token::AssociatedToken,
     token_interface::{mint_to_checked, Mint, MintToChecked, TokenAccount, TokenInterface},
@@ -95,12 +95,33 @@ impl<'info> BurnStakedNft<'info> {
             Ok((_, attributes, _)) => attributes,
         };
 
+        let current_timestamp = Clock::get()?.unix_timestamp;
+
         // Extract and validate staking attributes
+        let mut attribute_list: Vec<Attribute> =
+            Vec::with_capacity(fetched_attribute_list.attribute_list.len());
         let mut staked_value: Option<&str> = None;
+        let mut staked_at_value: Option<&str> = None;
 
         for attribute in &fetched_attribute_list.attribute_list {
-            if let "staked" = attribute.key.as_str() {
-                staked_value = Some(&attribute.value);
+            match attribute.key.as_str() {
+                "staked" => {
+                    staked_value = Some(&attribute.value);
+                    attribute_list.push(Attribute {
+                        key: "staked".to_string(),
+                        value: "true".to_string(), // we keep staked as true
+                    });
+                }
+                "staked_at" => {
+                    staked_at_value = Some(&attribute.value);
+                    attribute_list.push(Attribute {
+                        key: "staked_at".to_string(),
+                        value: current_timestamp.to_string(), // we update to current ts
+                    });
+                }
+                _ => {
+                    attribute_list.push(attribute.clone());
+                }
             }
         }
 
@@ -115,6 +136,20 @@ impl<'info> BurnStakedNft<'info> {
             .system_program(&self.system_program.to_account_info())
             .plugin(Plugin::FreezeDelegate(FreezeDelegate { frozen: false }))
             .invoke_signed(&[signer_seeds])?;
+
+        let staked_at_timestamp = staked_at_value
+            .ok_or(StakingError::InvalidTimestamp)?
+            .parse::<i64>()
+            .map_err(|_| StakingError::InvalidTimestamp)?;
+
+        // Calculate staked time in days
+        let elapsed_seconds = current_timestamp
+            .checked_sub(staked_at_timestamp)
+            .ok_or(StakingError::InvalidTimestamp)?;
+
+        let staked_time_days = elapsed_seconds
+            .checked_div(SECONDS_PER_DAY as i64)
+            .ok_or(StakingError::InvalidTimestamp)?;
 
         // Decrement total_staked, collection will always have a attribute initialized
         if let Ok((_, attributes, _)) = fetch_plugin::<BaseCollectionV1, Attributes>(
@@ -148,6 +183,10 @@ impl<'info> BurnStakedNft<'info> {
                 .invoke_signed(&[signer_seeds])?;
         }
 
+        let amount = (staked_time_days as u64)
+            .checked_mul(self.config.points_per_stake as u64)
+            .ok_or(StakingError::Overflow)?;
+
         // Prepare signer seeds for config PDA
         let config_seeds = &[
             b"config",
@@ -164,7 +203,14 @@ impl<'info> BurnStakedNft<'info> {
             authority: self.config.to_account_info(),
         };
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, config_signer_seeds);
-        mint_to_checked(cpi_ctx, 100_000_000, self.rewards_mint.decimals)?; // mint 100
+
+        mint_to_checked(
+            cpi_ctx,
+            100_000_000u64
+                .checked_add(amount)
+                .ok_or(StakingError::InvalidNumber)?,
+            self.rewards_mint.decimals,
+        )?; // mint 100
 
         // burn the asset, directly as user is signer (or maybe we can use update_authority via BurnDelegate)
         BurnV1CpiBuilder::new(&self.mpl_core_program.to_account_info())
