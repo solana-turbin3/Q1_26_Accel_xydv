@@ -83,7 +83,9 @@ impl<'info> CreateCollection<'info> {
             init_plugin_authority: Some(PluginAuthority::UpdateAuthority),
             lifecycle_checks: vec![(
                 HookableLifecycleEvent::Transfer,
-                ExternalCheckResult { flags: 4 }, // ?
+                // can reject the lifecycle event
+                // https://github.com/metaplex-foundation/mpl-core/blob/e021ca45e55285bb1f95789f010ac62e64caad1b/programs/mpl-core/src/plugins/lifecycle.rs#L53
+                ExternalCheckResult { flags: 4 },
             )],
             base_address_config: None,
             results_offset: Some(mpl_core::types::ValidationResultsOffset::Anchor),

@@ -1,14 +1,25 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { NftStakingCore } from "../target/types/nft_staking_core";
-import { Keypair, SendTransactionError, SystemProgram } from "@solana/web3.js";
-import { MPL_CORE_PROGRAM_ID } from "@metaplex-foundation/mpl-core";
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  SendTransactionError,
+  SystemProgram,
+} from "@solana/web3.js";
+import {
+  MPL_CORE_PROGRAM_ID,
+  fetchAssetV1,
+  fetchCollectionV1,
+} from "@metaplex-foundation/mpl-core";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { assert } from "chai";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { publicKey } from "@metaplex-foundation/umi";
 
 const MILLISECONDS_PER_DAY = 86400000;
 const POINTS_PER_STAKED_NFT_PER_DAY = 10_000_000;
@@ -18,6 +29,7 @@ const TIME_TRAVEL_IN_DAYS = 8;
 describe("nft-staking-core", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
+  const umi = createUmi(provider.connection.rpcEndpoint);
   anchor.setProvider(provider);
 
   const program = anchor.workspace.nftStakingCore as Program<NftStakingCore>;
@@ -100,8 +112,21 @@ describe("nft-staking-core", () => {
       })
       .signers([collectionKeypair])
       .rpc();
+
+    // crank reward vault
+    await provider.connection.requestAirdrop(
+      rewardsAccount,
+      10 * LAMPORTS_PER_SOL
+    );
+
+    const collectionData = await fetchCollectionV1(
+      umi,
+      publicKey(collectionKeypair.publicKey)
+    );
+
     console.log("\nYour transaction signature", tx);
     console.log("Collection address", collectionKeypair.publicKey.toBase58());
+    console.log(collectionData.attributes?.attributeList);
   });
 
   it("Mint an NFT", async () => {
@@ -119,8 +144,11 @@ describe("nft-staking-core", () => {
       })
       .signers([nftKeypair])
       .rpc();
+    const nftData = await fetchAssetV1(umi, publicKey(nftKeypair.publicKey));
+
     console.log("\nYour transaction signature", tx);
     console.log("NFT address", nftKeypair.publicKey.toBase58());
+    console.log(nftData.attributes?.attributeList);
   });
 
   it("Initialize stake config", async () => {
@@ -166,11 +194,15 @@ describe("nft-staking-core", () => {
     // Advance time in milliseconds
     const currentTimestamp = Date.now();
     await advanceTime({
-      absoluteTimestamp: currentTimestamp + 5 * 60 * 60 * 1000,
+      absoluteTimestamp: currentTimestamp + 10 * 60 * 60 * 1000,
     });
   });
 
   it("Update oracle", async () => {
+    const oldLamports = await provider.connection.getBalance(
+      provider.wallet.publicKey
+    );
+
     const tx = await program.methods
       .updateOracle()
       .accountsPartial({
@@ -181,8 +213,13 @@ describe("nft-staking-core", () => {
       })
       .rpc();
 
+    const newLamports = await provider.connection.getBalance(
+      provider.wallet.publicKey
+    );
+
     const oracle = await program.account.oracle.all();
     console.log("\nUpdated Oracle", oracle[0].account.validation);
+    console.log("\nReward got: ", newLamports - oldLamports);
   });
 
   // this one would fail
@@ -220,6 +257,18 @@ describe("nft-staking-core", () => {
       })
       .rpc();
     console.log("\nYour transaction signature", tx);
+
+    const nftData = await fetchAssetV1(umi, publicKey(nftKeypair.publicKey));
+
+    const collectionData = await fetchCollectionV1(
+      umi,
+      publicKey(collectionKeypair.publicKey)
+    );
+
+    console.log({
+      nftData: nftData.attributes?.attributeList,
+      collectionData: collectionData.attributes?.attributeList,
+    });
   });
 
   it("Time travel 1 day", async () => {
@@ -262,6 +311,9 @@ describe("nft-staking-core", () => {
       (await provider.connection.getTokenAccountBalance(userRewardsAta)).value
         .uiAmount
     );
+
+    const nftData = await fetchAssetV1(umi, publicKey(nftKeypair.publicKey));
+    console.log(nftData.attributes?.attributeList);
   });
 
   it("Time travel 8 days", async () => {
@@ -307,6 +359,13 @@ describe("nft-staking-core", () => {
       (await provider.connection.getTokenAccountBalance(userRewardsAta)).value
         .uiAmount
     );
+
+    const collectionData = await fetchCollectionV1(
+      umi,
+      publicKey(collectionKeypair.publicKey)
+    );
+
+    console.log(collectionData.attributes?.attributeList);
   });
 
   xit("Unstake an NFT", async () => {
@@ -340,5 +399,17 @@ describe("nft-staking-core", () => {
       (await provider.connection.getTokenAccountBalance(userRewardsAta)).value
         .uiAmount
     );
+
+    const nftData = await fetchAssetV1(umi, publicKey(nftKeypair.publicKey));
+
+    const collectionData = await fetchCollectionV1(
+      umi,
+      publicKey(collectionKeypair.publicKey)
+    );
+
+    console.log({
+      nftData: nftData.attributes?.attributeList,
+      collectionData: collectionData.attributes?.attributeList,
+    });
   });
 });
