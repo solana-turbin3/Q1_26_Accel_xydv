@@ -13,3 +13,6 @@
 [submodule "pinocchio-fundraiser"]
 	path = pinocchio-fundraiser
 	url = https://github.com/xydv/pinocchio-fundraiser
+[submodule "accel-Enclave"]
+	path = accel-Enclave
+	url = https://github.com/Turbin3/accel-Enclave
